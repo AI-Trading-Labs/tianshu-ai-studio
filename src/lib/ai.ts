@@ -1,9 +1,16 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI({
-  baseURL: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
-  apiKey: process.env.NVIDIA_API_KEY || '',
-})
+let client: OpenAI | null = null
+
+function getClient() {
+  if (!client) {
+    client = new OpenAI({
+      baseURL: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
+      apiKey: process.env.NVIDIA_API_KEY || '',
+    })
+  }
+  return client
+}
 
 const MODEL = process.env.AI_MODEL || 'minimaxai/minimax-m2.7'
 
@@ -30,7 +37,7 @@ export async function generateVideoContent(
 请按以下JSON格式回复（不要markdown代码块）：
 {"script":"...","storyboard":["..."],"voiceover":"...","titles":["..."],"hashtags":["#..."]}`
 
-  const completion = await client.chat.completions.create({
+  const completion = await getClient().chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: '你是一个专业的短视频内容策划专家。始终以JSON格式回复。' },
